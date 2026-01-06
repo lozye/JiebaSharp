@@ -9,14 +9,17 @@
 		<RootNamespace>JiebaNet</RootNamespace>
 
 		<!-- nuget -->
-		<Description>JiebaSharp</Description>
+		<Description>支持.net10的Jieba分词</Description>
 		<PackRelease>true</PackRelease>
 		<PackageProjectUrl>https://github.com/lozye/JiebaSharp</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/lozye/JiebaSharp</RepositoryUrl>
+		<RepositoryType>github</RepositoryType>
 		<Authors>Lozye</Authors>
 		<Company>Lozye</Company>
 		<Version>1.0.0.1</Version>
 		<IncludeContentInPack>true</IncludeContentInPack>		
 		<PackageReadmeFile>$(ProjectDir)\readme.md</PackageReadmeFile>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<Nuget>false</Nuget>
 	</PropertyGroup>
 
@@ -28,13 +31,13 @@
 		<Compile Remove="**\DefaultDictionary.cs" />
 		<Compile Remove="**\Spelling\*.cs" />
 		<Compile Remove="**\FileExtension.cs" />
-		<Content Include="..\Segmenter\Resources\*.*" LinkBase="Resources">
+		<Content Include="..\Segmenter\Resources\*.*" LinkBase="Resources" PackagePath="Resources">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Include="..\Analyser\Resources\*.*" LinkBase="Resources">
+		<Content Include="..\Analyser\Resources\*.*" LinkBase="Resources" PackagePath="Resources">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<None Include="..\readme.md" Pack="true" PackagePath="\" />
+		<None Include="..\readme.md;..\LICENSE" Pack="true" PackagePath="\" />
 	</ItemGroup>
 	<ItemGroup Condition="'$(DefineConstants.Contains(`LuceneSharp`))'">
 		<PackageReference Include="Lucene.Net" Version="4.8.0-beta00017" />

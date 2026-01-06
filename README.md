@@ -1,15 +1,18 @@
 # JiebaSharp
 
-## »ùÓÚ
+## åŸºäº
 forked from [SilentCC/JIEba-netcore](https://github.com/SilentCC/JIEba-netcore)
 
-## ĞŞ¸ÄÏî
-+ ĞŞ¸ÄÁË `WordDictionary` Ö§³ÖÁË²»Í¬·Ö´ÊÊµÀı¼ÓÔØ²»Í¬×Öµä [issues](https://github.com/anderscui/jieba.NET/issues/91)
-+ ĞŞ¸ÄÁË `FileExtension` ¿ÉÍ¨¹ı `FileExtension.Provider` ĞŞ¸Ä´ÊµäÎÄ¼ş¹ÜÀíÆ÷£¬²¢ĞŞ¸ÄÁËJSONĞòÁĞ»¯¹¤¾ß
-+ ĞŞ¸ÄÁË `JiebaAnalyzer` ¼ò»¯Ê¹ÓÃ
-+ ÏîÄ¿ÎÄ¼şÖĞĞÂÔö `<DefineConstants>LuceneSharp;</DefineConstants>` £¬ÓÃÒÔ¿ØÖÆÊÇ·ñÒıÓÃ `Lucene.Net` ºÍ±àÒë `JiebaAnalyzer`
-+ ´ÊµäÊ¹ÓÃÁËÕ¼ÓÃÄÚ´æ½ÏĞ¡µÄ´ÊµäÎÄ¼ş https://github.com/fxsjy/jieba/raw/master/extra_dict/dict.txt.small
+## NUGET
++ [nuget](https://www.nuget.org/packages/JiebaSharp/)
+
+## ä¿®æ”¹é¡¹
++ ä¿®æ”¹äº† `WordDictionary` æ”¯æŒäº†ä¸åŒåˆ†è¯å®ä¾‹åŠ è½½ä¸åŒå­—å…¸ [issues](https://github.com/anderscui/jieba.NET/issues/91)
++ ä¿®æ”¹äº† `FileExtension` å¯é€šè¿‡ `FileExtension.Provider` ä¿®æ”¹è¯å…¸æ–‡ä»¶ç®¡ç†å™¨ï¼Œå¹¶ä¿®æ”¹äº†JSONåºåˆ—åŒ–å·¥å…·
++ ä¿®æ”¹äº† `JiebaAnalyzer` ç®€åŒ–ä½¿ç”¨
++ é¡¹ç›®æ–‡ä»¶ä¸­æ–°å¢ `<DefineConstants>LuceneSharp;</DefineConstants>` ï¼Œç”¨ä»¥æ§åˆ¶æ˜¯å¦å¼•ç”¨ `Lucene.Net` å’Œç¼–è¯‘ `JiebaAnalyzer`
++ è¯å…¸ä½¿ç”¨äº†å ç”¨å†…å­˜è¾ƒå°çš„è¯å…¸æ–‡ä»¶ https://github.com/fxsjy/jieba/raw/master/extra_dict/dict.txt.small
 
 
-## ¸½Â¼
-+ [´Êµä](https://github.com/fxsjy/jieba)
+## é™„å½•
++ [è¯å…¸](https://github.com/fxsjy/jieba)
