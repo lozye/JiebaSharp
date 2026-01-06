@@ -1,23 +1,21 @@
-﻿using System;
-using Lucene.Net.Analysis.TokenAttributes;
-using Lucene.Net.Analysis;
+﻿using JiebaNet;
 using JiebaNet.Segmenter;
-using System.IO;
+using Lucene.Net.Analysis;
+using Lucene.Net.Analysis.TokenAttributes;
+using System;
 using System.Collections.Generic;
-using System.Reflection;
-using Microsoft.Extensions.FileProviders;
+using System.IO;
 
-namespace jieba.NET
+namespace JiebaNet
 {
-    public class JieBaTokenizer
-        : Tokenizer
+    public class JieBaTokenizer : Tokenizer
     {
         private static bool _initial = false;
         private string _inputText;
         private bool _originalResult = false;
         private int _start = 0;
 
-        private readonly string _stropWordsPath = "Resources/stopwords.txt";
+        // private readonly string _stropWordsPath = "Resources/stopwords.txt";
 
         private readonly JiebaSegmenter _segmenter;
         private TokenizerMode _mode;
@@ -47,20 +45,12 @@ namespace jieba.NET
 
         private void LoadStopWords()
         {
-            var fileProvider = new EmbeddedFileProvider(GetType().GetTypeInfo().Assembly);
-            var fileInfo = fileProvider.GetFileInfo(_stropWordsPath);
+            var lines = FileExtension.LoadLines(ConfigManager.UserStopWordsFile);
 
-            using (var reader = new StreamReader(fileInfo.CreateReadStream()))
+            foreach (var item in lines)
             {
-                var s = "";
-                while ((s = reader.ReadLine()) != null)
-                {
-                    if (String.IsNullOrEmpty(s))
-                        continue;
-                    if (_stopWords.ContainsKey(s))
-                        continue;
-                    _stopWords.Add(s, 1);
-                }
+                if (string.IsNullOrWhiteSpace(item)) continue;
+                _stopWords.Add(item, 1);
             }
         }
 

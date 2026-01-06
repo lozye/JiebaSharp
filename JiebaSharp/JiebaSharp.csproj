@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFrameworks>net10.0;net6.0;</TargetFrameworks>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>disable</Nullable>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<DocumentationFile>bin\$(MSBuildProjectName).xml</DocumentationFile>
+		<DefineConstants>LuceneSharp;</DefineConstants>
+		<RootNamespace>JiebaNet</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Compile Include="..\Analyser\**\*.cs" Exclude="**\obj\**\*.cs;**\bin\**\*.cs" LinkBase="Analyser" />
+		<Compile Include="..\Segmenter\**\*.cs" Exclude="**\obj\**\*.cs;**\bin\**\*.cs" LinkBase="Segmenter" />
+		<Compile Remove="**\ConfigManager.cs" />
+		<Compile Remove="**\WordDictionary.cs" />
+		<Compile Remove="**\DefaultDictionary.cs" />
+		<Compile Remove="**\Spelling\*.cs" />
+		<Compile Remove="**\FileExtension.cs" />
+		<Content Include="..\Segmenter\Resources\*.*" LinkBase="Resources">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="..\Analyser\Resources\*.*" LinkBase="Resources">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+	<ItemGroup Condition="'$(DefineConstants.Contains(`LuceneSharp`))'">
+		<PackageReference Include="Lucene.Net" Version="4.8.0-beta00017" />		
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="10.0.1" />
+	</ItemGroup>
+</Project>
+
+

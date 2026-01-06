@@ -1,15 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26228.4
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11304.174
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "jieba.NET", "jieba.NET\jieba.NET.csproj", "{89EFA758-206C-4681-ACF6-6F2AB2415279}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Analyser", "Analyser\Analyser.csproj", "{4F0DEF27-C5FE-448F-9B08-F8C2254A1075}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Segmenter", "Segmenter\Segmenter.csproj", "{C564CDCB-B52B-455E-86E9-FC0DAE37EF08}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{37B4E86E-2759-47CE-A59A-4301EE500BD8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JiebaSharp", "JiebaSharp\JiebaSharp.csproj", "{ED365146-BFD5-4FD0-B79F-612FE41A9DF6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{DF27B3F3-06EA-4498-88AA-868302258E3A}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,24 +18,19 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{89EFA758-206C-4681-ACF6-6F2AB2415279}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{89EFA758-206C-4681-ACF6-6F2AB2415279}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{89EFA758-206C-4681-ACF6-6F2AB2415279}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{89EFA758-206C-4681-ACF6-6F2AB2415279}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4F0DEF27-C5FE-448F-9B08-F8C2254A1075}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4F0DEF27-C5FE-448F-9B08-F8C2254A1075}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4F0DEF27-C5FE-448F-9B08-F8C2254A1075}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4F0DEF27-C5FE-448F-9B08-F8C2254A1075}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C564CDCB-B52B-455E-86E9-FC0DAE37EF08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C564CDCB-B52B-455E-86E9-FC0DAE37EF08}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C564CDCB-B52B-455E-86E9-FC0DAE37EF08}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C564CDCB-B52B-455E-86E9-FC0DAE37EF08}.Release|Any CPU.Build.0 = Release|Any CPU
 		{37B4E86E-2759-47CE-A59A-4301EE500BD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{37B4E86E-2759-47CE-A59A-4301EE500BD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{37B4E86E-2759-47CE-A59A-4301EE500BD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{37B4E86E-2759-47CE-A59A-4301EE500BD8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED365146-BFD5-4FD0-B79F-612FE41A9DF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED365146-BFD5-4FD0-B79F-612FE41A9DF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED365146-BFD5-4FD0-B79F-612FE41A9DF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED365146-BFD5-4FD0-B79F-612FE41A9DF6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5E678716-B941-4BC4-B24C-487E11ABAE8E}
 	EndGlobalSection
 EndGlobal

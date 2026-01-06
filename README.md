@@ -1,24 +1,15 @@
-# JIEba-netcore
+# JiebaSharp
 
-åŸºäº[jieba.NETCore](https://github.com/linezero/jieba.NET) 
+## »ùÓÚ
+forked from [SilentCC/JIEba-netcore](https://github.com/SilentCC/JIEba-netcore)
 
-åœ¨.net coreç‰ˆçš„JIEbaåˆ†è¯ä¸Šï¼Œåšäº†ä¿®æ”¹ï¼Œä½¿å…¶æ”¯æŒnet core2.0 å’Œæ”¯æŒ[Lucene.net](https://github.com/apache/lucenenet)æ¥å£
-ps: ä¿®æ”¹äº†JIEbaåˆ†è¯ï¼Œå¯¼è‡´çš„é«˜äº®bug
+## ĞŞ¸ÄÏî
++ ĞŞ¸ÄÁË `WordDictionary` Ö§³ÖÁË²»Í¬·Ö´ÊÊµÀı¼ÓÔØ²»Í¬×Öµä [issues](https://github.com/anderscui/jieba.NET/issues/91)
++ ĞŞ¸ÄÁË `FileExtension` ¿ÉÍ¨¹ı `FileExtension.Provider` ĞŞ¸Ä´ÊµäÎÄ¼ş¹ÜÀíÆ÷£¬²¢ĞŞ¸ÄÁËJSONĞòÁĞ»¯¹¤¾ß
++ ĞŞ¸ÄÁË `JiebaAnalyzer` ¼ò»¯Ê¹ÓÃ
++ ÏîÄ¿ÎÄ¼şÖĞĞÂÔö `<DefineConstants>LuceneSharp;</DefineConstants>` £¬ÓÃÒÔ¿ØÖÆÊÇ·ñÒıÓÃ `Lucene.Net` ºÍ±àÒë `JiebaAnalyzer`
++ ´ÊµäÊ¹ÓÃÁËÕ¼ÓÃÄÚ´æ½ÏĞ¡µÄ´ÊµäÎÄ¼ş https://github.com/fxsjy/jieba/raw/master/extra_dict/dict.txt.small
 
-# Available On NuGet
 
-
- >[Lucene.JIEba.net](https://www.nuget.org/packages/Lucene.JIEba.net/)
-
-
-# é›†æˆåˆ°Lucene.Netç¤ºä¾‹
-
-```c#
-  Analyzer analyzer = new JieBaAnalyzer(TokenizerMode.Search);
-  Analyzer analyzer = new JieBaAnalyzer(TokenizerMode.Default);
-  TokenStream = analyzer.GetTokenStream(str,indexReader);
-
-```
-
- # ç›¸å…³æ–‡æ¡£
-[JIEba.net é›†æˆåˆ°Lucene.Netçš„è¿‡ç¨‹](https://www.cnblogs.com/dacc123/p/8431369.html) 
+## ¸½Â¼
++ [´Êµä](https://github.com/fxsjy/jieba)

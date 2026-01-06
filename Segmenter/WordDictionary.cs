@@ -1,21 +1,19 @@
+using JiebaNet.Segmenter.Common;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using JiebaNet.Segmenter.Common;
-using Microsoft.Extensions.FileProviders;
-using System.Reflection;
 
 namespace JiebaNet.Segmenter
 {
-    public class WordDictionary
+    public class WordDictionary : IEnumerable<KeyValuePair<string, int>>
     {
         private static readonly Lazy<WordDictionary> lazy = new Lazy<WordDictionary>(() => new WordDictionary());
         private static readonly string MainDict = ConfigManager.MainDictFile;
 
-        internal IDictionary<string, int> Trie = new Dictionary<string, int>();
+        private IDictionary<string, int> Trie = new Dictionary<string, int>();
 
         /// <summary>
         /// total occurrence of all words.
@@ -30,6 +28,7 @@ namespace JiebaNet.Segmenter
             Debug.WriteLine("total freq: {0}", Total);
         }
 
+
         public static WordDictionary Instance
         {
             get { return lazy.Value; }
@@ -41,34 +40,29 @@ namespace JiebaNet.Segmenter
             {
                 var stopWatch = new Stopwatch();
                 stopWatch.Start();
-                var filePath = ConfigManager.MainDictFile;
-                var provider = new EmbeddedFileProvider(GetType().GetTypeInfo().Assembly);
-                var fileInfo = provider.GetFileInfo(filePath);
-                using (var sr = new StreamReader(fileInfo.CreateReadStream(), Encoding.UTF8))
+                var lines = FileExtension.LoadLines(ConfigManager.MainDictFile);
+
+                foreach (var line in lines)
                 {
-                    string line = null;
-                    while ((line = sr.ReadLine()) != null)
+                    var tokens = line.Split(' ');
+                    if (tokens.Length < 2)
                     {
-                        var tokens = line.Split(' ');
-                        if (tokens.Length < 2)
+                        Debug.Fail(string.Format("Invalid line: {0}", line));
+                        continue;
+                    }
+
+                    var word = tokens[0];
+                    var freq = int.Parse(tokens[1]);
+
+                    Trie[word] = freq;
+                    Total += freq;
+
+                    foreach (var ch in Enumerable.Range(0, word.Length))
+                    {
+                        var wfrag = word.Sub(0, ch + 1);
+                        if (!Trie.ContainsKey(wfrag))
                         {
-                            Debug.Fail(string.Format("Invalid line: {0}", line));
-                            continue;
-                        }
-
-                        var word = tokens[0];
-                        var freq = int.Parse(tokens[1]);
-
-                        Trie[word] = freq;
-                        Total += freq;
-
-                        foreach (var ch in Enumerable.Range(0, word.Length))
-                        {
-                            var wfrag = word.Sub(0, ch + 1);
-                            if (!Trie.ContainsKey(wfrag))
-                            {
-                                Trie[wfrag] = 0;
-                            }
+                            Trie[wfrag] = 0;
                         }
                     }
                 }
@@ -90,6 +84,8 @@ namespace JiebaNet.Segmenter
         {
             return Trie.ContainsKey(word) && Trie[word] > 0;
         }
+
+        public bool TryGetValue(string key, out int value) => Trie.TryGetValue(key, out value);
 
         public int GetFreqOrDefault(string key)
         {
@@ -133,5 +129,8 @@ namespace JiebaNet.Segmenter
 
             return Math.Max((int)(freq * Total) + 1, GetFreqOrDefault(word));
         }
+
+        public IEnumerator<KeyValuePair<string, int>> GetEnumerator() => Trie.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

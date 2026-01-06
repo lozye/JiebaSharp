@@ -1,9 +1,5 @@
-using JiebaNet.Segmenter.Common;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 
 namespace JiebaNet.Analyser
 {
@@ -30,7 +26,7 @@ namespace JiebaNet.Analyser
             if (IdfFilePath != idfPath)
             {
                 IdfFilePath = idfPath;
-                var lines = FileExtension.ReadEmbeddedAllLines(idfPath, Encoding.UTF8);
+                var lines = FileExtension.LoadLines(idfPath);
                 IdfFreq = new Dictionary<string, double>();
                 foreach (var line in lines)
                 {

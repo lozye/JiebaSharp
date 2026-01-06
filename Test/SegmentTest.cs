@@ -1,10 +1,10 @@
 ﻿using JiebaNet.Segmenter;
+using Lucene.Net.Analysis;
 using System;
-using System.Text;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using jieba.NET;
+using System.Text;
 using Xunit;
 
 namespace Test
@@ -17,15 +17,15 @@ namespace Test
             var segmenter = new JiebaSegmenter();
             var segments = segmenter.Cut("我来到北京清华大学", cutAll: true);
 
-            var resultWords = new List<string> {"我", "来到", "北京", "清华", "清华大学", "华大", "大学"};
+            var resultWords = new List<string> { "我", "来到", "北京", "清华", "清华大学", "华大", "大学" };
             Compared(segments, resultWords);
-            
-            segments = segmenter.Cut("我来到北京清华大学"); 
-            resultWords = new List<string> { "我","来到", "北京", "清华大学"};
+
+            segments = segmenter.Cut("我来到北京清华大学");
+            resultWords = new List<string> { "我", "来到", "北京", "清华大学" };
             Compared(segments, resultWords);
 
             segments = segmenter.Cut("他来到了网易杭研大厦");  // 默认为精确模式，同时也使用HMM模型
-            resultWords = new List<string> {"他", "来到", "了", "网易", "杭研", "大厦"};
+            resultWords = new List<string> { "他", "来到", "了", "网易", "杭研", "大厦" };
             Compared(segments, resultWords);
 
             segments = segmenter.CutForSearch("小明硕士毕业于中国科学院计算所，后在日本京都大学深造"); // 搜索引擎模式
@@ -34,22 +34,22 @@ namespace Test
             Compared(segments, resultWords);
 
             segments = segmenter.Cut("结过婚的和尚未结过婚的");
-            resultWords = new List<string> {"结过婚","的" ,"和" ,"尚未" ,"结过婚","的"};
-          
+            resultWords = new List<string> { "结过婚", "的", "和", "尚未", "结过婚", "的" };
+
             Compared(segments, resultWords);
 
             segments = segmenter.Cut("快奔三", false, false);
-            resultWords = new List<string> {"快","奔三"};
+            resultWords = new List<string> { "快", "奔三" };
 
             Compared(segments, resultWords);
         }
 
-        private void Compared(IEnumerable<string> segments,List<string> resultWords)
+        private void Compared(IEnumerable<string> segments, List<string> resultWords)
         {
-            Assert.Equal(segments.Count(),resultWords.Count());
+            Assert.Equal(segments.Count(), resultWords.Count());
             for (int i = 0; i < segments.Count(); i++)
             {
-                Assert.Equal(segments.ElementAt(i),resultWords[i]);
+                Assert.Equal(segments.ElementAt(i), resultWords[i]);
             }
         }
 
@@ -67,17 +67,24 @@ namespace Test
                     wordInfos.ElementAt(i - 1).position + wordInfos.ElementAt(i - 1).value.Length);
             }
         }
-        
+
         [Fact]
         public void TestJIEbaTokenizer()
         {
-            var tokenizer = new JieBaTokenizer(TextReader.Null, TokenizerMode.Default);
+            var segmenter = new JiebaSegmenter();
+            foreach (string item in new string[] { "萧炎", "纳兰嫣然", "玄重尺" })
+                segmenter.AddWord(item);
 
-            Assert.NotEmpty(tokenizer.StopWords);
+            var text = "萧炎扛着玄重尺追着打纳兰嫣然";
 
-            Assert.True(tokenizer.StopWords.ContainsKey("是"));
-            Assert.True(tokenizer.StopWords.ContainsKey("什么"));
-            
+            var rs = segmenter.Tokenize(text);
+
+            var segmenter2 = new JiebaSegmenter();
+            var rs2 = segmenter2.Tokenize(text);
+
+
+            Assert.Contains<string>("纳兰嫣然", rs.Select(x => x.Word));
+            Assert.DoesNotContain<string>("纳兰嫣然", rs2.Select(x => x.Word));
         }
     }
 }

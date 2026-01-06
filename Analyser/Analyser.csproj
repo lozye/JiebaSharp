@@ -27,8 +27,4 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="1.0.0" />
   </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Segmenter\Segmenter.csproj" />
-  </ItemGroup>
 </Project>

@@ -1,8 +1,7 @@
+using JiebaNet.Segmenter.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using JiebaNet.Segmenter.Common;
-using Newtonsoft.Json;
 
 namespace JiebaNet.Segmenter.PosSeg
 {
@@ -55,7 +54,7 @@ namespace JiebaNet.Segmenter.PosSeg
             {
                 tokens.Add(new Pair(sentence.Substring(next), posList[next].Split('-')[1]));
             }
-            
+
             return tokens;
         }
 
@@ -63,17 +62,10 @@ namespace JiebaNet.Segmenter.PosSeg
 
         private static void LoadModel()
         {
-            var startJson = FileExtension.ReadEmbeddedAllLine(ConfigManager.PosProbStartFile);
-            _startProbs = JsonConvert.DeserializeObject<IDictionary<string, double>>(startJson);
-
-            var transJson = FileExtension.ReadEmbeddedAllLine(ConfigManager.PosProbTransFile);
-            _transProbs = JsonConvert.DeserializeObject<IDictionary<string, IDictionary<string, double>>>(transJson);
-
-            var emitJson = FileExtension.ReadEmbeddedAllLine(ConfigManager.PosProbEmitFile);
-            _emitProbs = JsonConvert.DeserializeObject<IDictionary<string, IDictionary<char, double>>>(emitJson);
-
-            var tabJson = FileExtension.ReadEmbeddedAllLine(ConfigManager.CharStateTabFile);
-            _stateTab = JsonConvert.DeserializeObject<IDictionary<char, List<string>>>(tabJson);
+            _startProbs = FileExtension.LoadString<Dictionary<string, double>>(ConfigManager.PosProbStartFile);
+            _transProbs = FileExtension.LoadString<Dictionary<string, IDictionary<string, double>>>(ConfigManager.PosProbTransFile);
+            _emitProbs = FileExtension.LoadString<Dictionary<string, IDictionary<char, double>>>(ConfigManager.PosProbEmitFile);
+            _stateTab = FileExtension.LoadString<Dictionary<char, List<string>>>(ConfigManager.CharStateTabFile);
         }
 
         // TODO: change sentence to obs?
@@ -144,13 +136,13 @@ namespace JiebaNet.Segmenter.PosSeg
             }
 
             var vLast = v.Last();
-            var last = memPath.Last().Keys.Select(y => new {State = y, Prob = vLast[y]});
+            var last = memPath.Last().Keys.Select(y => new { State = y, Prob = vLast[y] });
             var endProb = double.MinValue;
             var endState = string.Empty;
             foreach (var endPoint in last)
             {
                 // TODO: compare two very small values;
-                if (endProb < endPoint.Prob || 
+                if (endProb < endPoint.Prob ||
                     (endProb == endPoint.Prob && String.Compare(endState, endPoint.State, StringComparison.CurrentCultureIgnoreCase) < 0))
                 {
                     endProb = endPoint.Prob;
@@ -161,7 +153,7 @@ namespace JiebaNet.Segmenter.PosSeg
             var route = new string[sentence.Length];
             var n = sentence.Length - 1;
             var curState = endState;
-            while(n >= 0)
+            while (n >= 0)
             {
                 route[n] = curState;
                 curState = memPath[n][curState];

@@ -1,11 +1,9 @@
+using JiebaNet.Segmenter.Common;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using JiebaNet.Segmenter.Common;
-using Newtonsoft.Json;
 
 namespace JiebaNet.Segmenter.FinalSeg
 {
@@ -74,11 +72,9 @@ namespace JiebaNet.Segmenter.FinalSeg
                 {'S', -1.4652633398537678}
             };
 
-            var transJson = FileExtension.ReadEmbeddedAllLine(ConfigManager.ProbTransFile);
-            _transProbs = JsonConvert.DeserializeObject<IDictionary<char, IDictionary<char, double>>>(transJson);
 
-            var emitJson = FileExtension.ReadEmbeddedAllLine(ConfigManager.ProbEmitFile);
-            _emitProbs = JsonConvert.DeserializeObject<IDictionary<char, IDictionary<char, double>>>(emitJson);
+            _transProbs = FileExtension.LoadString<Dictionary<char, IDictionary<char, double>>>(ConfigManager.ProbTransFile);
+            _emitProbs = FileExtension.LoadString<Dictionary<char, IDictionary<char, double>>>(ConfigManager.ProbEmitFile);
 
             stopWatch.Stop();
             Debug.WriteLine("model loading finished, time elapsed {0} ms.", stopWatch.ElapsedMilliseconds);

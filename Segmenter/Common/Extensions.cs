@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace JiebaNet.Segmenter.Common
 {
-    public static class Extensions
+    internal static class Extensions
     {
         private static readonly Regex RegexDigits = new Regex(@"\d+", RegexOptions.Compiled);
         private static readonly Regex RegexNewline = new Regex("(\r\n|\n|\r)", RegexOptions.Compiled);
@@ -37,7 +36,7 @@ namespace JiebaNet.Segmenter.Common
             return (enumerable != null) && enumerable.Any();
         }
 
-        public static TValue GetValueOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> d, TKey key)
+        public static TValue GetJiebaValueOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> d, TKey key)
         {
             return d.ContainsKey(key) ? d[key] : default(TValue);
         }
@@ -93,7 +92,7 @@ namespace JiebaNet.Segmenter.Common
         {
             return RegexDigits.IsMatch(s);
         }
-        
+
         public static string[] SplitLines(this string s)
         {
             return RegexNewline.Split(s);

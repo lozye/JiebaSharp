@@ -1,18 +1,17 @@
+using JiebaNet.Segmenter.Common;
+using JiebaNet.Segmenter.FinalSeg;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using JiebaNet.Segmenter.Common;
-using JiebaNet.Segmenter.FinalSeg;
 using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace JiebaNet.Segmenter
 {
     public class JiebaSegmenter
     {
-        private static readonly WordDictionary WordDict = WordDictionary.Instance;
+        private readonly WordDictionary WordDict;
         private static readonly IFinalSeg FinalSeg = Viterbi.Instance;
         private static readonly ISet<string> LoadedPath = new HashSet<string>();
 
@@ -37,6 +36,7 @@ namespace JiebaNet.Segmenter
 
         public JiebaSegmenter()
         {
+            WordDict = WordDictionary.Instance.New();
             UserWordTagTab = new Dictionary<string, string>();
         }
 
@@ -76,7 +76,7 @@ namespace JiebaNet.Segmenter
             return CutIt(text, cutMethod, reHan, reSkip, cutAll);
         }
 
-        public IEnumerable<WordInfo> Cut2(string text,bool cutAll=false,bool hmm=true)
+        public IEnumerable<WordInfo> Cut2(string text, bool cutAll = false, bool hmm = true)
         {
             var reHan = RegexChineseDefault;
             var reSkip = RegexSkipDefault;
@@ -151,7 +151,6 @@ namespace JiebaNet.Segmenter
                 {
                     var width = w.value.Length;
                     result.Add(new Token(w.value, w.position, w.position + width));
-
                 }
             }
             else
@@ -185,7 +184,7 @@ namespace JiebaNet.Segmenter
 
                     result.Add(new Token(w.value, w.position, w.position + width));
 
-                 }
+                }
             }
 
             return result;
@@ -196,7 +195,7 @@ namespace JiebaNet.Segmenter
         internal IDictionary<int, List<int>> GetDag(string sentence)
         {
             var dag = new Dictionary<int, List<int>>();
-            var trie = WordDict.Trie;
+            // var trie = WordDict.Trie;
 
             var N = sentence.Length;
             for (var k = 0; k < sentence.Length; k++)
@@ -204,9 +203,9 @@ namespace JiebaNet.Segmenter
                 var templist = new List<int>();
                 var i = k;
                 var frag = sentence.Substring(k, 1);
-                while (i < N && trie.ContainsKey(frag))
+                while (i < N && WordDict.TryGetValue(frag, out var seq))
                 {
-                    if (trie[frag] > 0)
+                    if (seq > 0)
                     {
                         templist.Add(i);
                     }
@@ -234,7 +233,7 @@ namespace JiebaNet.Segmenter
             var route = new Dictionary<int, Pair<int>>();
             route[n] = new Pair<int>(0, 0.0);
 
-            var logtotal = Math.Log(WordDict.Total);
+            var logtotal = WordDict.GetLogarithm();
             for (var i = n - 1; i > -1; i--)
             {
                 var candidate = new Pair<int>(-1, double.MinValue);
@@ -369,44 +368,45 @@ namespace JiebaNet.Segmenter
             var result = new List<WordInfo>();
             var blocks = reHan.Split(text);
             var start = 0;
-            foreach(var blk in blocks)
+            foreach (var blk in blocks)
             {
-                if(string.IsNullOrWhiteSpace(blk))
+                if (string.IsNullOrWhiteSpace(blk))
                 {
                     start += blk.Length;
                     continue;
                 }
-                if(reHan.IsMatch(blk))
+                if (reHan.IsMatch(blk))
                 {
-                    foreach(var word in cutMethod(blk))
+                    foreach (var word in cutMethod(blk))
                     {
-                        result.Add(new WordInfo(word,start));
+                        result.Add(new WordInfo(word, start));
                         start += word.Length;
                     }
                 }
                 else
                 {
                     var tmp = reSkip.Split(blk);
-                    foreach(var x in tmp)
+                    foreach (var x in tmp)
                     {
-                        if(reSkip.IsMatch(x))
+                        if (reSkip.IsMatch(x))
                         {
-                            result.Add(new WordInfo(x,start));
+                            result.Add(new WordInfo(x, start));
                             start += x.Length;
                         }
-                        else if(!cutAll)
+                        else if (!cutAll)
                         {
-                            foreach(var ch in x)
+                            foreach (var ch in x)
                             {
-                                result.Add(new WordInfo(ch.ToString(),start));
+                                result.Add(new WordInfo(ch.ToString(), start));
                                 start += ch.ToString().Length;
                             }
                         }
-                        else{
-                          
-                            result.Add(new WordInfo(x,start));
+                        else
+                        {
+
+                            result.Add(new WordInfo(x, start));
                             start += x.Length;
-                            
+
                         }
                     }
                 }
@@ -483,7 +483,7 @@ namespace JiebaNet.Segmenter
                 {
                     var startTime = DateTime.Now.Millisecond;
 
-                    var lines = FileExtension.ReadEmbeddedAllLines(dictFullPath);
+                    var lines = FileExtension.LoadLines(dictFullPath);
                     foreach (var line in lines)
                     {
                         if (string.IsNullOrWhiteSpace(line))
@@ -521,7 +521,6 @@ namespace JiebaNet.Segmenter
                 freq = WordDict.SuggestFreq(word, Cut(word, hmm: false));
             }
             WordDict.AddWord(word, freq);
-
             // Add user word tag of POS
             if (!string.IsNullOrEmpty(tag))
             {
@@ -567,5 +566,5 @@ namespace JiebaNet.Segmenter
         Search
     }
 
-  
+
 }

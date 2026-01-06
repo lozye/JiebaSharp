@@ -1,10 +1,9 @@
+using JiebaNet.Segmenter.Common;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using JiebaNet.Segmenter.Common;
 
 namespace JiebaNet.Segmenter.PosSeg
 {
@@ -12,9 +11,6 @@ namespace JiebaNet.Segmenter.PosSeg
     {
         private static readonly WordDictionary WordDict = WordDictionary.Instance;
         private static readonly Viterbi PosSeg = Viterbi.Instance;
-
-        // TODO: 
-        private static readonly object locker = new object();
 
         #region Regular Expressions
 
@@ -43,7 +39,7 @@ namespace JiebaNet.Segmenter.PosSeg
             try
             {
                 _wordTagTab = new Dictionary<string, string>();
-                var lines = FileExtension.ReadEmbeddedAllLines(ConfigManager.MainDictFile);
+                var lines = FileExtension.LoadLines(ConfigManager.MainDictFile);
                 foreach (var line in lines)
                 {
                     var tokens = line.Split(' ');
@@ -256,7 +252,7 @@ namespace JiebaNet.Segmenter.PosSeg
                             {
                                 tokens.Add(new Pair(x, "m"));
                             }
-                            else if(RegexEnglishWords.IsMatch(x))
+                            else if (RegexEnglishWords.IsMatch(x))
                             {
                                 tokens.Add(new Pair(x, "eng"));
                             }
