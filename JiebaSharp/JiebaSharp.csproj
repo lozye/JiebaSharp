@@ -16,7 +16,7 @@
 		<RepositoryType>github</RepositoryType>
 		<Authors>Lozye</Authors>
 		<Company>Lozye</Company>
-		<Version>1.0.0.2</Version>
+		<Version>1.0.1</Version>
 		<IncludeContentInPack>true</IncludeContentInPack>
 		<PackageReadmeFile>$(ProjectDir)\readme.md</PackageReadmeFile>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
