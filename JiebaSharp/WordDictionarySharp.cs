@@ -1,4 +1,5 @@
-﻿using JiebaNet.Segmenter.Common;
+﻿using JiebaNet.Segmenter;
+using JiebaNet.Segmenter.Common;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,17 +11,33 @@ namespace JiebaNet
 {
     internal class WordDictionary : IEnumerable<KeyValuePair<string, int>>
     {
-        private IDictionary<string, int> _main;
+        private Dictionary<string, int> _main;
         private double _total;
         private int _locked;
         private readonly object _locker = new object();
+#if NET9_0_OR_GREATER
+        private Dictionary<string, int>.AlternateLookup<ReadOnlySpan<char>> _lookup;
+#endif
 
-        public WordDictionary New() => new WordDictionary { _main = Instance._main, _total = Instance._total };
+        private void EnsureLookup()
+        {
+#if NET9_0_OR_GREATER
+            _lookup = _main.GetAlternateLookup<ReadOnlySpan<char>>();
+#endif
+        }
+
+        public WordDictionary New()
+        {
+            var dict = new WordDictionary { _main = Instance._main, _total = Instance._total };
+            dict.EnsureLookup();
+            return dict;
+        }
         private WordDictionary(bool is_main)
         {
             _locked = 1;
-            _main = new Dictionary<string, int>();
+            _main = new Dictionary<string, int>(StringComparer.Ordinal);
             load_dict();
+            EnsureLookup();
         }
         private WordDictionary() { }
         private static readonly Lazy<WordDictionary> lazyInstance = new Lazy<WordDictionary>(() => new WordDictionary(true));
@@ -51,9 +68,9 @@ namespace JiebaNet
                     _main[word] = freq;
                     _total += freq;
 
-                    foreach (var ch in Enumerable.Range(0, word.Length))
+                    for (int i = 0; i < word.Length; i++)
                     {
-                        var wfrag = word.Sub(0, ch + 1);
+                        var wfrag = word.Substring(0, i + 1);
                         if (!_main.ContainsKey(wfrag)) _main[wfrag] = 0;
                     }
                 }
@@ -74,8 +91,18 @@ namespace JiebaNet
         /// </summary>
         /// <returns></returns>
         public double GetLogarithm() => Math.Log(_total);
-        public bool ContainsWord(string word) => _main.ContainsKey(word);
-        public bool TryGetValue(string key, out int value) => _main.TryGetValue(key, out value);
+        public bool ContainsWord(string word) => _main.TryGetValue(word, out var value) && value > 0;
+        public bool TryGetValue(string key, out int value) => _main.TryGetValue(key, out value) && value > 0;
+        public bool TryGetValue(ReadOnlySpan<char> key, out int value)
+        {
+#if NET9_0_OR_GREATER
+            return _lookup.TryGetValue(key, out value) && value > 0;
+#else
+            return _main.TryGetValue(key.ToString(), out value) && value > 0;
+#endif
+        }
+
+
         /// <summary>
         /// 新增复制机制，如果没修改过用户字典则直接使用_main对象，否则复制一个新的字典
         /// </summary>
@@ -86,8 +113,9 @@ namespace JiebaNet
             {
                 if (_locked != 1)
                 {
-                    var _temp = new Dictionary<string, int>(_main);
+                    var _temp = new Dictionary<string, int>(_main, StringComparer.Ordinal);
                     _main = _temp;
+                    EnsureLookup();
                     _locked = 1;
                 }
             }
@@ -107,15 +135,15 @@ namespace JiebaNet
             }
         }
         public void DeleteWord(string word) => AddWord(word, 0);
-        public int GetFreqOrDefault(string key) => TryGetValue(key, out int value) ? value : 1;
-        public int SuggestFreq(string word, IEnumerable<string> segments)
+        private int get_freq(string key) => TryGetValue(key, out int value) ? value : 1;
+        public int SuggestFreq(string word, IEnumerable<WordInfo> segments)
         {
             double freq = 1;
             foreach (var seg in segments)
             {
-                freq *= GetFreqOrDefault(seg) / _total;
+                freq *= get_freq(seg.value) / _total;
             }
-            return Math.Max((int)(freq * _total) + 1, GetFreqOrDefault(word));
+            return Math.Max((int)(freq * _total) + 1, get_freq(word));
         }
         public IEnumerator<KeyValuePair<string, int>> GetEnumerator() => _main.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

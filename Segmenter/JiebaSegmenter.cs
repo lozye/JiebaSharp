@@ -18,6 +18,7 @@ namespace JiebaNet.Segmenter
         private static readonly object locker = new object();
 
         internal IDictionary<string, string> UserWordTagTab { get; set; }
+        private readonly ICutMethodsApi[] CutMethods;
 
         #region Regular Expressions
 
@@ -37,7 +38,8 @@ namespace JiebaNet.Segmenter
         public JiebaSegmenter()
         {
             WordDict = WordDictionary.Instance.New();
-            UserWordTagTab = new Dictionary<string, string>();
+            UserWordTagTab = new Dictionary<string, string>(StringComparer.Ordinal);
+            CutMethods = new ICutMethodsApi[] { new All_CutMethodsApi(this), new Dag_CutMethodsApi(this), new DagWithoutHmm_CutMethodsApi(this) };
         }
 
         /// <summary>
@@ -50,37 +52,14 @@ namespace JiebaNet.Segmenter
         /// <returns></returns>
         public IEnumerable<string> Cut(string text, bool cutAll = false, bool hmm = true)
         {
-            var reHan = RegexChineseDefault;
-            var reSkip = RegexSkipDefault;
-            Func<string, IEnumerable<string>> cutMethod = null;
-
-            if (cutAll)
-            {
-                reHan = RegexChineseCutAll;
-                reSkip = RegexSkipCutAll;
-            }
-
-            if (cutAll)
-            {
-                cutMethod = CutAll;
-            }
-            else if (hmm)
-            {
-                cutMethod = CutDag;
-            }
-            else
-            {
-                cutMethod = CutDagWithoutHmm;
-            }
-
-            return CutIt(text, cutMethod, reHan, reSkip, cutAll);
+            var words = CutWords(text, cutAll, hmm);
+            return words.Select(x => x.value);
         }
 
-        public IEnumerable<WordInfo> Cut2(string text, bool cutAll = false, bool hmm = true)
+        public IEnumerable<WordInfo> CutWords(string text, bool cutAll = false, bool hmm = true)
         {
             var reHan = RegexChineseDefault;
             var reSkip = RegexSkipDefault;
-            Func<string, IEnumerable<string>> cutMethod = null;
 
             if (cutAll)
             {
@@ -88,32 +67,21 @@ namespace JiebaNet.Segmenter
                 reSkip = RegexSkipCutAll;
             }
 
-            if (cutAll)
-            {
-                cutMethod = CutAll;
-            }
-            else if (hmm)
-            {
-                cutMethod = CutDag;
-            }
-            else
-            {
-                cutMethod = CutDagWithoutHmm;
-            }
-
-            return CutIt2(text, cutMethod, reHan, reSkip, cutAll);
+            var method_api = cutAll ? CutMethods[0] : (hmm ? CutMethods[1] : CutMethods[2]);
+            return CutWordsCore(text, method_api, reHan, reSkip, cutAll);
         }
 
         public IEnumerable<string> CutForSearch(string text, bool hmm = true)
         {
             var result = new List<string>();
 
-            var words = Cut(text, hmm: hmm);
-            foreach (var w in words)
+            var words = CutWords(text, hmm: hmm);
+            foreach (var word in words)
             {
+                var w = word.value;
                 if (w.Length > 2)
                 {
-                    foreach (var i in Enumerable.Range(0, w.Length - 1))
+                    for (var i = 0; i < w.Length - 1; i++)
                     {
                         var gram2 = w.Substring(i, 2);
                         if (WordDict.ContainsWord(gram2))
@@ -125,7 +93,7 @@ namespace JiebaNet.Segmenter
 
                 if (w.Length > 3)
                 {
-                    foreach (var i in Enumerable.Range(0, w.Length - 2))
+                    for (var i = 0; i < w.Length - 2; i++)
                     {
                         var gram3 = w.Substring(i, 3);
                         if (WordDict.ContainsWord(gram3))
@@ -147,7 +115,7 @@ namespace JiebaNet.Segmenter
 
             if (mode == TokenizerMode.Default)
             {
-                foreach (var w in Cut2(text, hmm: hmm))
+                foreach (var w in CutWords(text, hmm: hmm))
                 {
                     var width = w.value.Length;
                     result.Add(new Token(w.value, w.position, w.position + width));
@@ -156,7 +124,7 @@ namespace JiebaNet.Segmenter
             else
             {
                 //var xx = Cut2(text, hmm: hmm);
-                foreach (var w in Cut2(text, hmm: hmm))
+                foreach (var w in CutWords(text, hmm: hmm))
                 {
                     var width = w.value.Length;
                     if (width > 2)
@@ -192,42 +160,55 @@ namespace JiebaNet.Segmenter
 
         #region Internal Cut Methods
 
-        internal IDictionary<int, List<int>> GetDag(string sentence)
+
+        /// <summary>
+        /// 使用 ReadOnlySpan 优化的 DAG 生成
+        /// </summary>
+        public Dictionary<int, List<int>> GetDag(ReadOnlySpan<char> sentence)
         {
             var dag = new Dictionary<int, List<int>>();
-            // var trie = WordDict.Trie;
+            int n = sentence.Length;
 
-            var N = sentence.Length;
-            for (var k = 0; k < sentence.Length; k++)
+            for (int k = 0; k < n; k++)
             {
-                var templist = new List<int>();
-                var i = k;
-                var frag = sentence.Substring(k, 1);
-                while (i < N && WordDict.TryGetValue(frag, out var seq))
+                var tmpList = new List<int>();
+                int i = k;
+
+                // 初始切片：长度为1
+                ReadOnlySpan<char> frag = sentence.Slice(k, 1);
+
+                // 循环条件：索引不越界 且 词典包含该前缀
+                // lookup.ContainsKey(frag) 不会产生任何内存分配
+                while (i < n && WordDict.TryGetValue(frag, out var seq))
                 {
+                    // 获取词频 (Python: if self.FREQ[frag])
                     if (seq > 0)
                     {
-                        templist.Add(i);
+                        tmpList.Add(i);
                     }
 
                     i++;
-                    // TODO:
-                    if (i < N)
+                    if (i < n)
                     {
-                        frag = sentence.Sub(k, i + 1);
+                        // 扩大切片范围 (零分配)
+                        // Slice(start, length)
+                        frag = sentence.Slice(k, i - k + 1);
                     }
                 }
-                if (templist.Count == 0)
+
+                if (tmpList.Count == 0)
                 {
-                    templist.Add(k);
+                    tmpList.Add(k);
                 }
-                dag[k] = templist;
+
+                dag[k] = tmpList;
             }
 
             return dag;
         }
 
-        internal IDictionary<int, Pair<int>> Calc(string sentence, IDictionary<int, List<int>> dag)
+
+        internal IDictionary<int, Pair<int>> Calc(ReadOnlySpan<char> sentence, IDictionary<int, List<int>> dag)
         {
             var n = sentence.Length;
             var route = new Dictionary<int, Pair<int>>();
@@ -236,10 +217,12 @@ namespace JiebaNet.Segmenter
             var logtotal = WordDict.GetLogarithm();
             for (var i = n - 1; i > -1; i--)
             {
-                var candidate = new Pair<int>(-1, double.MinValue);
+                var candidate = new Pair<int>(-1, double.NegativeInfinity);
                 foreach (int x in dag[i])
                 {
-                    var freq = Math.Log(WordDict.GetFreqOrDefault(sentence.Sub(i, x + 1))) - logtotal + route[x + 1].Freq;
+                    var slice = sentence.Slice(i, x + 1 - i);
+                    var seq = WordDict.TryGetValue(slice, out var s) ? s : 1;
+                    var freq = Math.Log(seq) - logtotal + route[x + 1].Freq;
                     if (candidate.Freq < freq)
                     {
                         candidate.Freq = freq;
@@ -250,134 +233,22 @@ namespace JiebaNet.Segmenter
             }
             return route;
         }
-
-        internal IEnumerable<string> CutAll(string sentence)
-        {
-            var dag = GetDag(sentence);
-
-            var words = new List<string>();
-            var lastPos = -1;
-
-            foreach (var pair in dag)
-            {
-                var k = pair.Key;
-                var nexts = pair.Value;
-                if (nexts.Count == 1 && k > lastPos)
-                {
-                    words.Add(sentence.Substring(k, nexts[0] + 1 - k));
-                    lastPos = nexts[0];
-                }
-                else
-                {
-                    foreach (var j in nexts)
-                    {
-                        if (j > k)
-                        {
-                            words.Add(sentence.Substring(k, j + 1 - k));
-                            lastPos = j;
-                        }
-                    }
-                }
-            }
-
-            return words;
-        }
-
-        internal IEnumerable<string> CutDag(string sentence)
-        {
-            var dag = GetDag(sentence);
-            var route = Calc(sentence, dag);
-
-            var tokens = new List<string>();
-
-            var x = 0;
-            var n = sentence.Length;
-            var buf = string.Empty;
-            while (x < n)
-            {
-                var y = route[x].Key + 1;
-                var w = sentence.Substring(x, y - x);
-                if (y - x == 1)
-                {
-                    buf += w;
-                }
-                else
-                {
-                    if (buf.Length > 0)
-                    {
-                        AddBufferToWordList(tokens, buf);
-                        buf = string.Empty;
-                    }
-                    tokens.Add(w);
-                }
-                x = y;
-            }
-
-            if (buf.Length > 0)
-            {
-                AddBufferToWordList(tokens, buf);
-            }
-
-            return tokens;
-        }
-
-        internal IEnumerable<string> CutDagWithoutHmm(string sentence)
-        {
-            var dag = GetDag(sentence);
-            var route = Calc(sentence, dag);
-
-            var words = new List<string>();
-
-            var x = 0;
-            string buf = string.Empty;
-            var N = sentence.Length;
-
-            var y = -1;
-            while (x < N)
-            {
-                y = route[x].Key + 1;
-                var l_word = sentence.Substring(x, y - x);
-                if (RegexEnglishChars.IsMatch(l_word) && l_word.Length == 1)
-                {
-                    buf += l_word;
-                    x = y;
-                }
-                else
-                {
-                    if (buf.Length > 0)
-                    {
-                        words.Add(buf);
-                        buf = string.Empty;
-                    }
-                    words.Add(l_word);
-                    x = y;
-                }
-            }
-
-            if (buf.Length > 0)
-            {
-                words.Add(buf);
-            }
-
-            return words;
-        }
-
-        internal IEnumerable<WordInfo> CutIt2(string text, Func<string, IEnumerable<string>> cutMethod,
-                                           Regex reHan, Regex reSkip, bool cutAll)
+        internal IEnumerable<WordInfo> CutWordsCore(string text, ICutMethodsApi method_api, Regex reHan, Regex reSkip, bool cutAll)
         {
             var result = new List<WordInfo>();
             var blocks = reHan.Split(text);
             var start = 0;
+
             foreach (var blk in blocks)
             {
-                if (string.IsNullOrWhiteSpace(blk))
+                if (string.IsNullOrEmpty(blk))
                 {
-                    start += blk.Length;
+                    // 空字符串，跳过并不改变 start
                     continue;
                 }
                 if (reHan.IsMatch(blk))
                 {
-                    foreach (var word in cutMethod(blk))
+                    foreach (var word in method_api.Cut(blk))
                     {
                         result.Add(new WordInfo(word, start));
                         start += word.Length;
@@ -398,61 +269,13 @@ namespace JiebaNet.Segmenter
                             foreach (var ch in x)
                             {
                                 result.Add(new WordInfo(ch.ToString(), start));
-                                start += ch.ToString().Length;
+                                start += 1;
                             }
                         }
                         else
                         {
-
                             result.Add(new WordInfo(x, start));
                             start += x.Length;
-
-                        }
-                    }
-                }
-            }
-
-            return result;
-        }
-
-        internal IEnumerable<string> CutIt(string text, Func<string, IEnumerable<string>> cutMethod,
-                                           Regex reHan, Regex reSkip, bool cutAll)
-        {
-            var result = new List<string>();
-            var blocks = reHan.Split(text);
-            foreach (var blk in blocks)
-            {
-                if (string.IsNullOrWhiteSpace(blk))
-                {
-                    continue;
-                }
-
-                if (reHan.IsMatch(blk))
-                {
-                    foreach (var word in cutMethod(blk))
-                    {
-                        result.Add(word);
-                    }
-                }
-                else
-                {
-                    var tmp = reSkip.Split(blk);
-                    foreach (var x in tmp)
-                    {
-                        if (reSkip.IsMatch(x))
-                        {
-                            result.Add(x);
-                        }
-                        else if (!cutAll)
-                        {
-                            foreach (var ch in x)
-                            {
-                                result.Add(ch.ToString());
-                            }
-                        }
-                        else
-                        {
-                            result.Add(x);
                         }
                     }
                 }
@@ -518,7 +341,7 @@ namespace JiebaNet.Segmenter
         {
             if (freq <= 0)
             {
-                freq = WordDict.SuggestFreq(word, Cut(word, hmm: false));
+                freq = WordDict.SuggestFreq(word, CutWords(word, hmm: false));
             }
             WordDict.AddWord(word, freq);
             // Add user word tag of POS
@@ -537,7 +360,7 @@ namespace JiebaNet.Segmenter
 
         #region Private Helpers
 
-        private void AddBufferToWordList(List<string> words, string buf)
+        internal void AddBufferToWordList(List<string> words, string buf)
         {
             if (buf.Length == 1)
             {
@@ -552,7 +375,10 @@ namespace JiebaNet.Segmenter
                 }
                 else
                 {
-                    words.AddRange(buf.Select(ch => ch.ToString()));
+                    for (int i = 0; i < buf.Length; i++)
+                    {
+                        words.Add(buf.Substring(i, 1));
+                    }
                 }
             }
         }
@@ -565,6 +391,5 @@ namespace JiebaNet.Segmenter
         Default,
         Search
     }
-
 
 }

@@ -4,7 +4,7 @@ namespace JiebaNet
 {
     public class ConfigManager
     {
-        public static string ConfigFileBaseDir { get; set; } = "Resources";
+        public static string ConfigFileBaseDir { get; set; } = "Resources\\JiebaSharp";
 
         public static string IdfFile
         {

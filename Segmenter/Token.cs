@@ -1,10 +1,10 @@
 ﻿namespace JiebaNet.Segmenter
 {
-    public class Token
+    public struct Token
     {
-        public string Word { get; set; }
-        public int StartIndex { get; set; }
-        public int EndIndex { get; set; }
+        public string Word { get; private set; }
+        public int StartIndex { get; private set; }
+        public int EndIndex { get; private set; }
 
         public Token(string word, int startIndex, int endIndex)
         {
