@@ -219,7 +219,7 @@ namespace JiebaNet.Segmenter
                 foreach (int x in dag[i])
                 {
                     var slice = sentence.Slice(i, x + 1 - i);
-                    var seq = WordDict.TryGetValue(slice, out var s) ? s : 1;
+                    var seq = WordDict.TryGetValue(slice, out var s) & s > 0 ? s : 1;
                     var freq = Math.Log(seq) - logtotal + route[x + 1].Freq;
                     if (candidate.Freq < freq)
                     {

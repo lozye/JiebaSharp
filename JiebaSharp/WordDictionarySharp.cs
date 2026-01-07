@@ -92,13 +92,6 @@ namespace JiebaNet
         public bool ContainsWord(string word) => _main.TryGetValue(word, out var value) && value > 0;
 
         /// <summary>
-        /// 获取所有词的词频（包含词频为0的需要额外处理）
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        public bool TryGetValue(string key, out int value) => _main.TryGetValue(key, out value);
-        /// <summary>
         /// 获取有效词的词频（包含词频为0的需要额外处理）
         /// </summary>
         /// <param name="key"></param>
@@ -112,8 +105,6 @@ namespace JiebaNet
             return _main.TryGetValue(key.ToString(), out value);
 #endif
         }
-
-
         /// <summary>
         /// 新增复制机制，如果没修改过用户字典则直接使用_main对象，否则复制一个新的字典
         /// </summary>
@@ -135,7 +126,7 @@ namespace JiebaNet
         {
             EnsureLocked();
 
-            if (TryGetValue(word, out var f) && f > 0) { _total -= f; }
+            if (_main.TryGetValue(word, out var f) && f > 0) { _total -= f; }
             _main[word] = freq;
             _total += freq;
 
@@ -146,7 +137,7 @@ namespace JiebaNet
             }
         }
         public void DeleteWord(string word) => AddWord(word, 0);
-        private int get_freq(string key) => TryGetValue(key, out int f) && f > 0 ? f : 1;
+        private int get_freq(string key) => _main.TryGetValue(key, out int f) && f > 0 ? f : 1;
         public int SuggestFreq(string word, IEnumerable<WordInfo> segments)
         {
             double freq = 1;

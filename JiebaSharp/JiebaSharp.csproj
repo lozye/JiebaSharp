@@ -5,7 +5,7 @@
 		<Nullable>disable</Nullable>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<DocumentationFile>bin\$(MSBuildProjectName).xml</DocumentationFile>
-		<DefineConstants>LuceneSharp;SmallDict</DefineConstants>
+		<DefineConstants>LuceneSharp;SmallDict;</DefineConstants>
 		<RootAllConstants>LuceneSharp;TfidfAndPosSeg;SmallDict;BigDict</RootAllConstants>
 		<RootNamespace>JiebaNet</RootNamespace>		
 		<!-- nuget -->

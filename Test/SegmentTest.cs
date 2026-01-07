@@ -66,6 +66,7 @@ namespace Test
             Assert.Equal(wordInfos.ElementAt(0).position, 0);
             for (int i = 1; i < wordInfos.Count(); i++)
             {
+
                 Assert.Equal(wordInfos.ElementAt(i).position,
                     wordInfos.ElementAt(i - 1).position + wordInfos.ElementAt(i - 1).value.Length);
             }
