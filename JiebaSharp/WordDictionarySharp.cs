@@ -1,11 +1,9 @@
 ﻿using JiebaNet.Segmenter;
-using JiebaNet.Segmenter.Common;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 
 namespace JiebaNet
 {
@@ -92,13 +90,26 @@ namespace JiebaNet
         /// <returns></returns>
         public double GetLogarithm() => Math.Log(_total);
         public bool ContainsWord(string word) => _main.TryGetValue(word, out var value) && value > 0;
-        public bool TryGetValue(string key, out int value) => _main.TryGetValue(key, out value) && value > 0;
+
+        /// <summary>
+        /// 获取所有词的词频（包含词频为0的需要额外处理）
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public bool TryGetValue(string key, out int value) => _main.TryGetValue(key, out value);
+        /// <summary>
+        /// 获取有效词的词频（包含词频为0的需要额外处理）
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public bool TryGetValue(ReadOnlySpan<char> key, out int value)
         {
 #if NET9_0_OR_GREATER
-            return _lookup.TryGetValue(key, out value) && value > 0;
+            return _lookup.TryGetValue(key, out value);
 #else
-            return _main.TryGetValue(key.ToString(), out value) && value > 0;
+            return _main.TryGetValue(key.ToString(), out value);
 #endif
         }
 
@@ -124,7 +135,7 @@ namespace JiebaNet
         {
             EnsureLocked();
 
-            if (TryGetValue(word, out var f)) { _total -= f; }
+            if (TryGetValue(word, out var f) && f > 0) { _total -= f; }
             _main[word] = freq;
             _total += freq;
 
@@ -135,7 +146,7 @@ namespace JiebaNet
             }
         }
         public void DeleteWord(string word) => AddWord(word, 0);
-        private int get_freq(string key) => TryGetValue(key, out int value) ? value : 1;
+        private int get_freq(string key) => TryGetValue(key, out int f) && f > 0 ? f : 1;
         public int SuggestFreq(string word, IEnumerable<WordInfo> segments)
         {
             double freq = 1;

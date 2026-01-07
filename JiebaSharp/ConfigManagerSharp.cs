@@ -6,16 +6,6 @@ namespace JiebaNet
     {
         public static string ConfigFileBaseDir { get; set; } = "Resources\\JiebaSharp";
 
-        public static string IdfFile
-        {
-            get { return Path.Combine(ConfigFileBaseDir, "idf.txt"); }
-        }
-
-        public static string StopWordsFile
-        {
-            get { return Path.Combine(ConfigFileBaseDir, "stopwords.txt"); }
-        }
-
         public static string MainDictFile
         {
             get { return Path.Combine(ConfigFileBaseDir, "dict.txt"); }
@@ -31,6 +21,17 @@ namespace JiebaNet
             get { return Path.Combine(ConfigFileBaseDir, "prob_emit.json"); }
         }
 
+
+#if TfidfAndPosSeg
+
+       public static string StopWordsFile
+        {
+            get { return Path.Combine(ConfigFileBaseDir, "stopwords.txt"); }
+        }
+        public static string IdfFile
+        {
+            get { return Path.Combine(ConfigFileBaseDir, "idf.txt"); }
+        }
         public static string PosProbStartFile
         {
             get { return Path.Combine(ConfigFileBaseDir, "pos_prob_start.json"); }
@@ -49,5 +50,6 @@ namespace JiebaNet
         {
             get { return Path.Combine(ConfigFileBaseDir, "char_state_tab.json"); }
         }
+#endif
     }
 }

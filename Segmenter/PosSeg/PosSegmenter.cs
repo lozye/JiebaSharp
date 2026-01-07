@@ -1,3 +1,4 @@
+#if TfidfAndPosSeg
 using JiebaNet.Segmenter.Common;
 using System;
 using System.Collections.Generic;
@@ -295,3 +296,4 @@ namespace JiebaNet.Segmenter.PosSeg
         #endregion
     }
 }
+#endif

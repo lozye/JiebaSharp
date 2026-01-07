@@ -1,4 +1,5 @@
-﻿using JiebaNet.Segmenter;
+﻿#if TfidfAndPosSeg
+using JiebaNet.Segmenter;
 using JiebaNet.Segmenter.Common;
 using JiebaNet.Segmenter.PosSeg;
 using System;
@@ -108,9 +109,6 @@ namespace JiebaNet.Analyser
         }
     }
 
-    public class WordWeightPair
-    {
-        public string Word { get; set; }
-        public double Weight { get; set; }
-    }
+ 
 }
+#endif

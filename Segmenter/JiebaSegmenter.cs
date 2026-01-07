@@ -1,4 +1,3 @@
-using JiebaNet.Segmenter.Common;
 using JiebaNet.Segmenter.FinalSeg;
 using System;
 using System.Collections.Generic;
@@ -123,7 +122,6 @@ namespace JiebaNet.Segmenter
             }
             else
             {
-                //var xx = Cut2(text, hmm: hmm);
                 foreach (var w in CutWords(text, hmm: hmm))
                 {
                     var width = w.value.Length;

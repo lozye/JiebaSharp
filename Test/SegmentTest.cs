@@ -11,11 +11,14 @@ namespace Test
 {
     public class SegmenterTest
     {
+        /// <summary>
+        /// 全量词典的测试
+        /// </summary>
         [Fact]
         public void TestCut()
         {
             var segmenter = new JiebaSegmenter();
-            var segments = segmenter.Cut("我来到北京清华大学", cutAll: true);
+            var segments = segmenter.Cut("我来到北京清华大学", cutAll: true);            
 
             var resultWords = new List<string> { "我", "来到", "北京", "清华", "清华大学", "华大", "大学" };
             Compared(segments, resultWords);
@@ -58,7 +61,7 @@ namespace Test
         {
             var segmenter = new JiebaSegmenter();
 
-            var wordInfos = segmenter.Cut2("推荐系统终于发布了最终的版本，点击率蹭蹭上涨");
+            var wordInfos = segmenter.CutWords("推荐系统终于发布了最终的版本，点击率蹭蹭上涨");
 
             Assert.Equal(wordInfos.ElementAt(0).position, 0);
             for (int i = 1; i < wordInfos.Count(); i++)

@@ -5,9 +5,9 @@
 		<Nullable>disable</Nullable>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<DocumentationFile>bin\$(MSBuildProjectName).xml</DocumentationFile>
-		<DefineConstants>LuceneSharp;</DefineConstants>
-		<RootNamespace>JiebaNet</RootNamespace>
-
+		<DefineConstants>LuceneSharp;SmallDict</DefineConstants>
+		<RootAllConstants>LuceneSharp;TfidfAndPosSeg;SmallDict;BigDict</RootAllConstants>
+		<RootNamespace>JiebaNet</RootNamespace>		
 		<!-- nuget -->
 		<Description>支持.net10的Jieba分词</Description>
 		<PackRelease>true</PackRelease>
@@ -31,18 +31,31 @@
 		<Compile Remove="**\DefaultDictionary.cs" />
 		<Compile Remove="**\Spelling\*.cs" />
 		<Compile Remove="**\FileExtension.cs" />
-		<Content Include="..\Segmenter\Resources\*.*" LinkBase="Resources\JiebaSharp" Pack="true">
+		
+		<!-- 资源文件 -->
+		<Content Include="..\Resources\standard\*.*" LinkBase="Resources\JiebaSharp" Pack="true">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<PackagePath>contentFiles\any\any\Resources\JiebaSharp</PackagePath>			
+			<PackageCopyToOutput>true</PackageCopyToOutput>
+		</Content>
+		<Content Include="..\Resources\posseg\*.*" LinkBase="Resources\JiebaSharp" Pack="true" Condition="'$(DefineConstants.Contains(`TfidfAndPosSeg`))'">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<PackagePath>contentFiles\any\any\Resources\JiebaSharp</PackagePath>
 			<PackageCopyToOutput>true</PackageCopyToOutput>
 		</Content>
-		<Content Include="..\Analyser\Resources\*.*" LinkBase="Resources\JiebaSharp" Pack="true">
+		<Content Include="..\Resources\dict_small\*.*" LinkBase="Resources\JiebaSharp" Pack="true" Condition="'$(DefineConstants.Contains(`SmallDict`))'">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<PackagePath>contentFiles\any\any\Resources\JiebaSharp</PackagePath>
+			<PackageCopyToOutput>true</PackageCopyToOutput>
+		</Content>
+		<Content Include="..\Resources\dict_big\*.*" LinkBase="Resources\JiebaSharp" Pack="true" Condition="'$(DefineConstants.Contains(`BigDict`))'">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<PackagePath>contentFiles\any\any\Resources\JiebaSharp</PackagePath>
 			<PackageCopyToOutput>true</PackageCopyToOutput>
 		</Content>
 		<None Include="..\readme.md;..\LICENSE" Pack="true" PackagePath="\" />
 	</ItemGroup>
+	
 	<ItemGroup Condition="'$(DefineConstants.Contains(`LuceneSharp`))'">
 		<PackageReference Include="Lucene.Net" Version="4.8.0-beta00017" />
 	</ItemGroup>
